@@ -23,19 +23,26 @@ client.on("ready", () => {
 });
 
 client.on("message", message => {
+
     function isValidCommand(message) {
         return (message.content.startsWith(prefix) && !message.author.bot);
     } // returns whether or not the message is a valid command
     
-    if (isValidCommand(message)) { return; } // exits if the message is not a valid command
-    const args = message.content.slice(prefix.length).split(" +");
-    const commmandName = args.shift().toLowerCase();
-
+    if (!isValidCommand(message)) { return; }
+    // exits if the message is not a valid command
+    const args = message.content.slice(prefix.length).split(/ +/);
+    const commandName = args.shift().toLowerCase();
+    
+    // const command = client.commands.get(commandName)
+	// 	|| client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+    // if (!command) return;
     const command = client.commands.get(commandName)
-                    || client.commands.find(cmd => cmd.aliases.includes(commandName));
-    if (!command) { return; }
+		|| client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
-    if (command.args && !args.length) {
+	if (!command) return;
+
+
+    if (command.args === true && !args.length && !typeof command === "string") {
         let reply = `You didn't provide any arguments, ${message.author}.`;
         if (command.usage) {
             reply += `\nThe proper usage would be:\n${prefix}${command.name} ${command.usage}`;
@@ -58,6 +65,10 @@ client.on("message", message => {
 
     if (checkRole(message, metadata.roles.staff.name)) { return; }
     if (checkRole(message, metadata.roles.admin.name)) { return; }
+
+    if (!cooldowns.has(command.name)) {
+        cooldowns.set(command.name, new Discord.Collection());
+    }
 
     const now = Date.now(); // var with current time
     const timestamps = cooldowns.get(command.name); // var that gets the Collection for triggered command
