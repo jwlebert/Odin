@@ -53,18 +53,18 @@ client.on("message", message => {
 
     function checkRole(message, perm) {
         if (command.permissions === false) { return; };
-        let truth = (command.permissions === perm.name
-                    && !message.member.roles.cache.some(role => role.name.toLowerCase() === perm.name));
+        let truth = (command.permissions.toLowerCase() === perm.name.toLowerCase()
+                    && !message.member.roles.cache.some(role => role.name.toLowerCase() === perm.name.toLowerCase()));
         if (truth) {
             var reply = `You don't have permissions to use this command, ${message.author}.\n` +
-                        `In order to use this command, you must have the ${role.name} role.`;
+                        `In order to use this command, you must have the ${perm.name} role.`;
             message.channel.send(reply);
         }
         return truth;
     }
 
-    if (checkRole(message, metadata.roles.staff.name)) { return; }
-    if (checkRole(message, metadata.roles.admin.name)) { return; }
+    if (checkRole(message, metadata.roles.staff)) { return; }
+    if (checkRole(message, metadata.roles.admin)) { return; }
 
     if (!cooldowns.has(command.name)) {
         cooldowns.set(command.name, new Discord.Collection());
