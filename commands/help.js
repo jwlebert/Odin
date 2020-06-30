@@ -13,6 +13,10 @@ module.exports = {
     execute(message, args) {
         const { commands } = message.client;
 
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
         function isRequestingList(args) {
             if (!args.length) {
                 return true;
@@ -24,7 +28,8 @@ module.exports = {
         }
 
         function isRequestingSpecification(args, commands) {
-            if (commands.contains(args[0])) { // I need this return return T/F if the array 'commands' has the value of 'args[0]'.
+            if (commands.some(command => { return command.name === args[0] }) ||
+                commands.find(cmd => cmd.aliases && cmd.aliases.includes(args[0]))) { 
                 return true;
             } else {
                 return false;
@@ -32,7 +37,7 @@ module.exports = {
         }
 
         function filterList(commands, filter) {
-            var list = commands.filter(command => {
+            let list = commands.filter(command => {
                 return command.type === filter;
             });
             return list;
@@ -60,6 +65,33 @@ module.exports = {
             .setTimestamp();
             return embed;
 
+        }
+
+        function constructEmbedSpecification(args, commands) {
+            let command = commands.get(args[0]) ||
+                        commands.find(cmd => cmd.aliases && cmd.aliases.includes(args[0]));
+            
+            let details = [];
+
+            details.push(`**Command name:** ${command.name}`);
+            if (command.aliases) { details.push(`**Command aliases:** ${command.aliases.join(', ')}`); };
+            if (command.description) { details.push(`**Command description:** ${command.description}`); };
+            if (command.usage) { details.push(`**Command usage:** ${prefix}${command.name} ${command.usage}`); };
+            details.push(`**Command cooldown:** ${command.cooldown || 3} seconds.`);
+
+            let information = details.join('\n');
+            information.slice(information.length - 2, information.length);
+            
+            const embed = new Discord.MessageEmbed()
+            .setColor(color || "#0000FF")
+            .setTitle(`${capitalizeFirstLetter(command.name)} Command Details:`)
+            .setAuthor("Odin")
+            .setDescription(`Here are some details about the ${command.name} command.`)
+            .addField("Information:", information)
+            .setFooter("Odin")
+            .setTimestamp();
+
+            return embed;
         }
 
         if (isRequestingList(args)) {
@@ -105,7 +137,7 @@ module.exports = {
         }
 
         if (isRequestingSpecification(args, commands)) {
-            console.log("yoooooo dude")
+            message.channel.send(constructEmbedSpecification(args, commands));
         }
     }
 }
