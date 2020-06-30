@@ -45,12 +45,27 @@ module.exports = {
             // commands with the type equal to 'filter'.
         }
 
+        function sortListsByOrder(lists) {
+            let information = [];
+            for (let i = 1; i <= 4; i++) {
+                let currentList = lists.filter(list => {
+                    return list.position === i;
+                });
+                let mapped = currentList.map(cur => `List ${cur.position}: ${cur.type} commands.`);
+                information.push(mapped[0]);
+                console.log(information);
+            };
+            return information;        
+        }
+
         function constructEmbedList(list, lists) {
             let items = list.items.map(item => item.name).join('\n');
             // Joins all of the names of the items in the list
             // with a new line between them.
             items.slice(items.length - 2, items.length);
             // Removes the final \n, so it doesn't look weird.
+            
+            // I know this is a horrible variable name, couldn't think of anything better.
 
             const embed = new Discord.MessageEmbed()
             .setColor(color || "#0000FF")
@@ -61,6 +76,7 @@ module.exports = {
                             `please type ${prefix}list <command>.\n` +
                             `In order to execute a command, please use the '${prefix}' prefix.`)
             .addField("**Commands:**", items || "empty or error.")
+            .addField("**Lists**", sortListsByOrder(lists))
             .setFooter("Odin")
             .setTimestamp();
             return embed;
