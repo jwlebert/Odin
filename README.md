@@ -1,5 +1,5 @@
-# discord.js-bot
-This directory will contain the code for a general purpose Discord bot, made with discord.js.
+# Odin
+This directory will contain the code for a general purpose Discord bot called Odin, made with discord.js.
 
 # What does this bot use?
 - discord.js (node.js)
