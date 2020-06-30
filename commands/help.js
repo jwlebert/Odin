@@ -6,7 +6,7 @@ module.exports = {
     description: 'Lists all availible commands.\nIf a command is specified, additional details will be listed.',
     aliases: ['list', 'commands'],
     type: "support",
-    usage: "<command or 'desc'>",
+    usage: "<command or list number>",
     args: "optional",
     cooldown: 3,
     permissions: false,
