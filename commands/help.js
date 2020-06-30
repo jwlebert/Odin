@@ -97,24 +97,32 @@ module.exports = {
         if (isRequestingList(args)) {
             // Constructing the lists
             let lists = [];
+
+            let completeList = {
+                items: commands,
+                type: "all",
+                position: 1
+            }
+            lists.push(completeList);
+
             let supportList = {
                 items: filterList(commands, "support"),
                 type: "support",
-                position: 1
+                position: 2
             };
             lists.push(supportList);
 
             let miscList = {
                 items: filterList(commands, "misc"),
                 type: "miscellaneous",
-                position: 2
+                position: 3
             };
             lists.push(miscList);
 
             let modList = {
                 items: filterList(commands, "moderation"),
                 type: "moderation",
-                position: 3
+                position: 4
             };
             lists.push(modList);
             // This sorts through all of the commands, and sorts them
@@ -122,16 +130,18 @@ module.exports = {
             message.delete();
             switch (parseInt(args[0])) {
                 case 1:
+                    message.channel.send(constructEmbedList(completeList, lists));
+                case 2:
                     message.channel.send(constructEmbedList(supportList, lists));
                     break;
-                case 2:
+                case 3:
                     message.channel.send(constructEmbedList(miscList, lists));
                     break;
-                case 3:
+                case 4:
                     message.channel.send(constructEmbedList(modList, lists));
                     break;
                 default:
-                    message.channel.send(constructEmbedList(supportList, lists));
+                    message.channel.send(constructEmbedList(completeList, lists));
                     break;
             }; // Sends the desired list
         }
