@@ -53,7 +53,6 @@ module.exports = {
                 });
                 let mapped = currentList.map(cur => `List ${cur.position}: ${cur.type} commands.`);
                 information.push(mapped[0]);
-                console.log(information);
             };
             return information;        
         }
