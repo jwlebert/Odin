@@ -53,6 +53,7 @@ client.on("message", message => {
 
     function checkRole(message, perm) {
         if (command.permissions === false) { return; };
+        if (message.author.id === message.guild.ownerID) { return; };
         let truth = (command.permissions.toLowerCase() === perm.name.toLowerCase()
                     && !message.member.roles.cache.some(role => role.name.toLowerCase() === perm.name.toLowerCase()));
         if (truth) {
