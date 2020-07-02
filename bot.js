@@ -25,7 +25,7 @@ client.on("ready", () => {
 client.on("message", message => {
 
     function isValidCommand(message) {
-        return (message.content.startsWith(prefix) && !message.author.bot);
+        return (message.content.toLowerCase().startsWith(prefix) && !message.author.bot);
     } // returns whether or not the message is a valid command
     
     if (!isValidCommand(message)) { return; }
