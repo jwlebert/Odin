@@ -8,8 +8,6 @@ module.exports = {
     cooldown: 3,
     permissions: false,
     execute(message, args) {
-        if (args === "ping") {
-            message.channel.send('Pong.');
-        }
+        message.channel.send('Pong.')
     }
 }
