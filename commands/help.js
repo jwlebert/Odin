@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
-const { prefix, color } = require('../config.json')
+const prefix = process.env.prefix
+const color = process.env.prefix
 
 module.exports = {
     name: 'help',
