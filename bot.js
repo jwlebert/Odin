@@ -2,7 +2,8 @@ const fs = require('fs');
 const Discord = require('discord.js');
 const client = new Discord.Client;
 
-const { prefix, token } = require('./config.json');
+const prefix = process.env.prefix;
+
 const metadata = require('./metadata.json');
 
 client.commands = new Discord.Collection(); // The container for all commands
