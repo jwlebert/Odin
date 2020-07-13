@@ -3,6 +3,7 @@ const Discord = require('discord.js');
 const client = new Discord.Client;
 
 const prefix = process.env.prefix;
+
 const metadata = require('./metadata.json');
 
 client.commands = new Discord.Collection(); // The container for all commands
@@ -100,4 +101,4 @@ client.on("message", message => {
 
 
 
-client.login(process.env.token);
+client.login(token);
