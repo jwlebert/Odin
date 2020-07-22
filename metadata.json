@@ -1,10 +1,14 @@
 {
     "roles": {
-        "staff": {
-            "name": "Staff"
-        },
         "admin": {
-            "name": "Admin"
+            "name": "Admin",
+            "position": 1,
+            "reason": "Required for command permissions."
+        },
+        "staff": {
+            "name": "Staff",
+            "position": 2,
+            "reason": "Required for command permissions."
         }
     }
 }
