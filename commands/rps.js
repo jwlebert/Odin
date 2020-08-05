@@ -7,7 +7,7 @@ module.exports = {
     usage: "<input>",
     args: true,
     cooldown: 5,
-    permissions: 'false',
+    permissions: false,
     execute(message, args) {
         var acceptedArguments = ["rock", "paper", "scissors"];
         var partialArguments = ["r", "p", "s"];
