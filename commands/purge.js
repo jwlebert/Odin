@@ -8,7 +8,6 @@ module.exports = {
     cooldown: 10,
     permissions: 'Staff',
     execute(message, args) {
-        message.delete();
-        message.channel.bulkDelete(args[0]);
+        message.channel.bulkDelete(args[0])
     }
 }
