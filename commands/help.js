@@ -163,6 +163,7 @@ module.exports = {
         }
 
         if (isRequestingSpecification(args, commands)) {
+            message.delete();
             message.channel.send(constructEmbedSpecification(args, commands));
         }
     }
