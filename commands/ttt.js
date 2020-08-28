@@ -11,6 +11,37 @@ module.exports = {
     permissions: false,
     execute(message, args) {
         let res = new Discord.MessageEmbed(); // 'res' will be used to send response embeds. The description will be overwritten before every use.
+        const tripleTick ="\`\`\`";
+
+        let board = {
+            A1: " ",
+            A2: " ",
+            A3: " ",
+            B1: " ",
+            B2: " ",
+            B3: " ",
+            C1: " ",
+            C2: " ",
+            C3: " ",
+            print() {
+                message.channel.send(
+                    `${tripleTick}Current board:\n` +
+                    " " + this.A1 + " | " + this.A2 + " | " + this.A3 + " A\n" +
+                    "-----------\n" +
+                    " " + this.B1 + " | " + this.B2 + " | " + this.B3 + " B\n" +
+                    "-----------\n" +
+                    " " + this.C1 + " | " + this.C2 + " | " + this.C3 + " C\n" +
+                    " 1   2   3 " + tripleTick
+                );
+            }
+        };
+
+        let match = {
+            status: 'in progress',
+            turn: true,
+            challenger: "",
+            challenged: ""
+        };
 
         switch (args[0]) { // Argument handler
             case 'h':
@@ -63,17 +94,18 @@ module.exports = {
             if (!message.mentions.users.first()) {
                 res.setDescription("You must specify a user to challenge.");
                 message.channel.send(res);
-            };
+                return;
+            }; // Checks if a user is metioned, if not, exits statement.
 
-            let challenger = message.author;
-            let challenged = message.mentions.users.first();
+            match.challenger = message.author;
+            match.challenged = message.mentions.users.first();
 
-            res.setDescription(`${challenged.username}, you have been challenged to a game of Tic Tac Toe by ${challenger.username}.\n` +
+            res.setDescription(`${match.challenged.username}, you have been challenged to a game of Tic Tac Toe by ${match.challenger.username}.\n` +
                                     `Please type 'accept' or 'a' to accept the match, and 'decline' or 'd' to decline the match.\n` +
                                     `This challenge will expire in 30 seconds.`);
             message.channel.send(res);
 
-            let filter = m => m.author === challenged &&
+            let filter = m => m.author === match.challenged &&
                         ['accept', 'a', 'decline', 'd'].some(c => c === m.content.toLowerCase())
             // ^ Checks if the message's author is the mentioned user, and if the content is one of the responses.
             let challengeResponse = message.channel.createMessageCollector(filter, { max: 1, time: 30000 });
@@ -87,18 +119,89 @@ module.exports = {
             challengeResponse.on('end', (col, reason) => {
                 switch (reason) { // A reason switch. This is used to determine outcomes of collectors.
                     case 'accept':
-                        res.setDescription(`${challenged.username} has accepted the challenge. The match will begin shortly.`);
+                        res.setDescription(`${match.challenged.username} has accepted the challenge. The match will begin shortly.`);
+                        message.channel.send(res);
                         startMatch();
                         break;
                     case 'decline':
-                        res.setDescription(`${challenged.username} has declined the challenge.`);
+                        res.setDescription(`${match.challenged.username} has declined the challenge.`);
+                        message.channel.send(res);
                         break;
                     case 'time': // The 'time' reason is emmited when the message collecter expires.
                         res.setDescription("The challenge has expired. If you still wish to play, please issue another challenge.");
+                        message.channel.send(res);
                         break;
                 };
-                message.channel.send(res);
             });
-        };
+        };  // This function starts a challenge which can be accepted or declined.
+            // If accepted, runs the 'startMatch()` function.
+
+        function startMatch() {
+            // create a quit function or something?
+            startTurn();
+        };  // This function starts the match. It should be run only once, at the start of the match.
+
+        // a function for quits
+
+        function startTurn() {
+            board.print();
+            let currentPlayer = match.turn ? match.challenger : match.challenged;
+            res.setDescription(`${currentPlayer}, it is your turn. Please select a position.`);
+            message.channel.send(res);
+            handleTurnResponse(currentPlayer);
+        }; // This function contains code that should be run at the start of every turn.
+
+        function handleTurnResponse(currentPlayer) {
+            let filter = m => m.author === currentPlayer &&
+            ["a1", "a2", "a3", "b1", "b2", "b3", "c1", "c2", "c3", "quit"].some(p => p === m.content.toLowerCase());
+            // Filters messages that are sent by the current player and whose content are a position (A1-C3);
+            let collector = message.channel.createMessageCollector(filter, { max: 1 });
+
+            collector.on('collect', m => {
+                console.log(m.content);
+                if (m.content.toLowerCase() === "quit") {
+                    collector.stop('quit')
+                } else if (board[m.content.toUpperCase()] !== " ") {
+                    collector.stop('occupied')
+                } else {
+                    board[m.content.toUpperCase()] = match.turn ? "x" : "o";
+                    // ^ Sets the value of specified turn depending on whose turn it is.
+                    match.turn = match.turn ? false : true;
+                    // ^ Toggles value of turn.
+                    checkBoardCondition(collector);
+                    collector.stop('turn end');
+                };
+            });
+
+            collector.on('end', (col, reason) => {
+                console.log(reason);
+                switch (reason) { // A reason switch for the turn ending.
+                    case 'turn end':
+                        startTurn();
+                        break;
+                    case 'occupied':
+                        res.setDescription('That position is occupied. Please select an availible position.');
+                        message.channel.send(res);
+                        startTurn();
+                        break;
+                    case 'full board':
+                        board.print();
+                        res.setDescription('The board is now full. Ending match.');
+                        message.channel.send(res);
+                        break;
+                };
+            });
+        };  // This function handles the turn response. It creates a message collector,
+            // and handles the collecting and end condtions.
+
+        function checkBoardCondition(collector) {
+
+            // Add win conditions.
+
+            if (!Object.values(board).includes(" ")) {
+                collector.stop('full board');
+            }; // Checks if the board is full.
+
+        };  // This function checks things such as win conditions or if the board is full.
     }
 };
