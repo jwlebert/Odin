@@ -12,13 +12,13 @@ module.exports = {
     permissions: false,
     execute(message, args) {
         let response = new Discord.MessageEmbed();
-        if (!checkArgumentValidity(args[0])) {
+        if (!checkArgumentValidity(args[0].toLowerCase())) {
             response.setDescription("Please enter a valid argument. These include: 'rock', 'r', 'paper', 'p', 'scissors', or 's'.");
             return message.channel.send(response);
         };
 
         let arguments = ["rock", "paper", "scissors"];
-        let userChoice = arguments[convertArgumentToNumber(args[0])];
+        let userChoice = arguments[convertArgumentToNumber(args[0].toLowerCase())];
         let botChoice = arguments[generateRandomNumber(0, 2)];
 
         let result = evalutateResponse(userChoice, botChoice);
@@ -28,6 +28,7 @@ module.exports = {
             `You chose ${userChoice} and the bot chose ${botChoice}.`
             );
 
+        message.delete();
         message.channel.send(response);
 
         function checkArgumentValidity(argument) {
