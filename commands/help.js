@@ -33,6 +33,8 @@ module.exports = {
                 commands.find(cmd => cmd.aliases && cmd.aliases.includes(args[0]))) { 
                 return true;
             } else {
+                let response = new Discord.MessageEmbed().setDescription('That is not a valid command. Please specifiy a valid command.');
+                message.channel.send(response);
                 return false;
             }
         }
@@ -90,9 +92,10 @@ module.exports = {
             let details = [];
 
             details.push(`**Command name:** ${command.name}`);
-            if (command.aliases) { details.push(`**Command aliases:** ${command.aliases.join(', ')}`); };
-            if (command.description) { details.push(`**Command description:** ${command.description}`); };
-            if (command.usage) { details.push(`**Command usage:** ${prefix}${command.name} ${command.usage}`); };
+            details.push(`**Command aliases:** ${command.aliases.join(', ')}`);
+            details.push(`**Command description:** ${command.description}`);
+            details.push(`**Command usage:** ${prefix}${command.name} ${command.usage}`);
+            details.push(`**Command permissions:** ${command.permissions}`);
             details.push(`**Command cooldown:** ${command.cooldown || 3} seconds.`);
 
             let information = details.join('\n');
@@ -160,9 +163,7 @@ module.exports = {
                     message.channel.send(constructEmbedList(completeList, lists));
                     break;
             }; // Sends the desired list
-        }
-
-        if (isRequestingSpecification(args, commands)) {
+        } else if (isRequestingSpecification(args, commands)) {
             message.delete();
             message.channel.send(constructEmbedSpecification(args, commands));
         }
