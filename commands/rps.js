@@ -1,3 +1,5 @@
+const Discord = require('discord.js');
+
 module.exports = {
     name: "rps",
     description: "Play a game of Rock, Paper, Scissors! against AI.\n" +
@@ -9,108 +11,66 @@ module.exports = {
     cooldown: 5,
     permissions: false,
     execute(message, args) {
-        var acceptedArguments = ["rock", "paper", "scissors"];
-        var partialArguments = ["r", "p", "s"];
-        function generateRandomInteger(min, max) { // generates a random integer between defined values
-            min = Math.ceil(min);
-            max = Math.floor(max);
-            return Math.floor(Math.random() * (max - min)) + min;
-        }
-        function checkPartialArguments(input) {
-            var value;
-            if (partialArguments.includes(input)) {
-                switch (input) {
-                    case "r":
-                        value = "rock";
-                        break;
-                    case "p":
-                        value = "paper";
-                        break;
-                    case "s":
-                        value = "scissors";
-                        break;
-                }
-                return value;
-            }
-            return (partialArguments.includes(input));
-            // checks if the input is a partial value;
-            // if FALSE: then return false
-            // if TRUE: return the value associated with the partial response (e.g r -> rock).
-        }
-        function isValidInput(inputArg) { // checks the validity of an answer
-            let input = inputArg.toLowerCase();
-            // if they enter abbreviated version, convert to full (e.g r -> rock)
+        let response = new Discord.MessageEmbed();
+        if (!checkArgumentValidity(args[0].toLowerCase())) {
+            response.setDescription("Please enter a valid argument. These include: 'rock', 'r', 'paper', 'p', 'scissors', or 's'.");
+            return message.channel.send(response);
+        };
 
-            if (acceptedArguments.includes(input)) {
-                return true;
-            }
-        }
-        function convertIntToArgument(input) { // turns the rps argument into an interger, for comparing.
-            var value;
-            switch (input) {
-                case 1:
-                    value = "rock";
-                    break;
-                case 2:
-                    value = "paper";
-                    break;
-                case 3:
-                    value = "scissors";
-                    break;
-            }
-            return value;
-        }
-        function decideResult(userArg, botArg) {
-            var result;
-            if (userArg === botArg) {
-                result = "draw";
-                return result;
-            } else {
-                result = "win";
-                switch (userArg) {
-                    case "rock":
-                        if (botArg === "paper") {result = "lose"};
-                        break;
-                    case "paper":
-                        if (botArg === "scissors") {result = "lose"};
-                        break;
-                    case "scissors":
-                        if (botArg === "rock") {result = "lose"};
-                }
-                return result;
-            }
-        }
-        function constructReply(result) {
-            var reply;
-            switch (result) {
-                case "draw":
-                    reply = "The match is a draw.\n";
-                    break;
-                case "win":
-                    reply = "You won the match.\n";
-                    break;
-                case "lose":
-                    reply = "You lost the match.\n";
-                    break;
-            }
-            reply += `You chose ${userArg}, and the bot chose ${botArg}.`;
-            return reply;
-        }
+        let arguments = ["rock", "paper", "scissors"];
+        let userChoice = arguments[convertArgumentToNumber(args[0].toLowerCase())];
+        let botChoice = arguments[generateRandomNumber(0, 2)];
 
-        var input = args[0];
+        let result = evalutateResponse(userChoice, botChoice);
 
-        if (!checkPartialArguments(input) === false) {
-            input = checkPartialArguments(input);
-        } // converts 
+        response.setDescription(
+            `${result === 'draw' ? "The match is a draw." : `You ${result} the match.`}\n` +
+            `You chose ${userChoice} and the bot chose ${botChoice}.`
+            );
 
-        if (!isValidInput(input)) { // exits the command if argument is invalid
-            return message.channel.send("This argument is invalid.\n" +
-             "Please use one of the accepted arguments: rock, paper, scissors.");
-        }
-        var userArg = input;
-        var botArg = convertIntToArgument(generateRandomInteger(1, 3));
+        message.delete();
+        message.channel.send(response);
 
-        var result = decideResult(userArg, botArg);
-        message.channel.send(constructReply(result));   
+        function checkArgumentValidity(argument) {
+            return ['rock', 'r', 'paper', 'p', 'scissors', 's'].some(c => c === argument) ? true : false;
+        };  // Checks if the passed in argument is a valid argument or argument shorthand (e.g 'rock', 'r', etc)
+            // Returns true if valid, otherwise returns false.
+
+        function generateRandomNumber(min, max) {
+            return Math.floor(Math.random() * (max - min + 1) + min);
+        };  // Generates a random number between the min and max variable.
+
+        function convertArgumentToNumber(argument) {
+            // Rock = 0, Paper = 1, Scissors = 2.
+            switch (argument) {
+                case 'r':
+                case 'rock':
+                    return 0;
+                    break;
+                case 'p':
+                case 'paper':
+                    return 1;
+                    break;
+                case 's':
+                case 'scissors':
+                    return 2;
+                    break;
+            };
+        };  // Converts an argument to it's respective number.
+
+        function evalutateResponse(userRes, botRes) {
+            if (userRes === botRes) { return 'draw' }; // If values are equal, return 'draw'.
+            switch (userRes) {
+                case 'rock':
+                    return botRes === 'scissors' ? 'won' : 'lost';
+                case 'paper':
+                    return botRes === 'rock' ? 'won' : 'lost';
+                case 'scissors':
+                    return botRes === 'paper' ? 'won' : 'lost';
+            };  // ^ Checks for each value, then uses a ternary operator to return 'won' or 'loss'
+                // depending on if the bot has a winning or losing value.
+
+        };  // Returns 'loss', 'win', or 'draw' depending on the user's choice, and the bot's choice.
+            // The returned values represent the user (e.g if 'win' is returned, the player won.)
     }
-}
+};
