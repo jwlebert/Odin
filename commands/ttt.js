@@ -112,7 +112,7 @@ module.exports = {
             let challengeResponse = message.channel.createMessageCollector(filter, { max: 1, time: 30000 });
 
             challengeResponse.on('collect', m => {
-                let response = ['accept', 'a'].some(c => c === m.content) ? 'accept' : 'decline';
+                let response = ['accept', 'a'].some(c => c === m.content.toLowerCase()) ? 'accept' : 'decline';
                 // ^ response is equal to 'accept' if the m.content is 'a' or 'accept', otherwise it's equal to 'decline'.
                 challengeResponse.stop(response); // Stops the collection with the response variable as the reason.
             });
@@ -161,7 +161,7 @@ module.exports = {
                 // if (m.content.toLowerCase() === "quit") {
                 //     collector.stop('quit')
                 // } else 
-                if (["quit", "exit", "leave"].some(c => c === m.content)) {
+                if (["quit", "exit", "leave"].some(c => c === m.content.toLowerCase())) {
                     // if either player (regardless of whose turn it is) types quit, exit, or leave, stop the match.
                     collector.stop('quit');
                 } else if (m.author !== currentPlayer) { // If it's not the players turn, exit.
