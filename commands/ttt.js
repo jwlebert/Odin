@@ -39,6 +39,7 @@ module.exports = {
         let match = {
             status: 'in progress',
             turn: true,
+            winner: false,
             challenger: "",
             challenged: ""
         };
@@ -141,8 +142,6 @@ module.exports = {
             startTurn();
         };  // This function starts the match. It should be run only once, at the start of the match.
 
-        // a function for quits
-
         function startTurn() {
             board.print();
             let currentPlayer = match.turn ? match.challenger : match.challenged;
@@ -152,15 +151,21 @@ module.exports = {
         }; // This function contains code that should be run at the start of every turn.
 
         function handleTurnResponse(currentPlayer) {
-            let filter = m => m.author === currentPlayer &&
-            ["a1", "a2", "a3", "b1", "b2", "b3", "c1", "c2", "c3", "quit"].some(p => p === m.content.toLowerCase());
+            let filter = m => [match.challenger, match.challenged].some(u => u === m.author) &&
+            ["a1", "a2", "a3", "b1", "b2", "b3", "c1", "c2", "c3", "quit", "exit", "leave"].some(p => p === m.content.toLowerCase());
             // Filters messages that are sent by the current player and whose content are a position (A1-C3);
-            let collector = message.channel.createMessageCollector(filter, { max: 1 });
+            let collector = message.channel.createMessageCollector(filter);
+            match.collector = collector;
 
             collector.on('collect', m => {
-                console.log(m.content);
-                if (m.content.toLowerCase() === "quit") {
-                    collector.stop('quit')
+                // if (m.content.toLowerCase() === "quit") {
+                //     collector.stop('quit')
+                // } else 
+                if (["quit", "exit", "leave"].some(c => c === m.content)) {
+                    // if either player (regardless of whose turn it is) types quit, exit, or leave, stop the match.
+                    collector.stop('quit');
+                } else if (m.author !== currentPlayer) { // If it's not the players turn, exit.
+                    return;
                 } else if (board[m.content.toUpperCase()] !== " ") {
                     collector.stop('occupied')
                 } else {
@@ -174,8 +179,12 @@ module.exports = {
             });
 
             collector.on('end', (col, reason) => {
-                console.log(reason);
                 switch (reason) { // A reason switch for the turn ending.
+                    case 'quit':
+                        res.setDescription('The game has ended by player request.');
+                        message.channel.send(res);
+                        match.status = 'finished';
+                        break;
                     case 'turn end':
                         startTurn();
                         break;
@@ -188,6 +197,13 @@ module.exports = {
                         board.print();
                         res.setDescription('The board is now full. Ending match.');
                         message.channel.send(res);
+                        match.status = 'finished';
+                        break;
+                    case 'win':
+                        board.print();
+                        res.setDescription(`${match.winner.username} has won the game.`);
+                        message.channel.send(res);
+                        match.status = 'finished';
                         break;
                 };
             });
@@ -195,8 +211,28 @@ module.exports = {
             // and handles the collecting and end condtions.
 
         function checkBoardCondition(collector) {
+            let winConditionPositionList = [
+                ["A1", "A2", "A3"],
+                ["B1", "B2", "B3"],
+                ["C1", "C2", "C3"],
+                ["A1", "B1", "C1"],
+                ["A2", "B2", "C2"],
+                ["A3", "B3", "C3"],
+                ["A1", "B2", "C3"],
+                ["A3", "B2", "C1"]
+            ];  // A list of all rows, columns, and diagonals that can constitute a win if they match.
 
-            // Add win conditions.
+            for (pos of winConditionPositionList) {
+                checkWinCondtionsOfPosisitions(pos);
+            };
+
+            function checkWinCondtionsOfPosisitions(positions) {
+                // positions should be a array containing three positions which are strings.
+                if (['x', 'o'].some(c => c === board[positions[0]] && c === board[positions[1]] && c === board[positions[2]])) {
+                    match.winner = board[positions[1]] === 'x' ? match.challenger : match.challenged;
+                    collector.stop('win');
+                };
+            };
 
             if (!Object.values(board).includes(" ")) {
                 collector.stop('full board');
