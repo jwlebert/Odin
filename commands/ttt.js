@@ -101,7 +101,7 @@ module.exports = {
             match.challenger = message.author;
             match.challenged = message.mentions.users.first();
 
-            res.setDescription(`${match.challenged.username}, you have been challenged to a game of Tic Tac Toe by ${match.challenger.username}.\n` +
+            res.setDescription(`${match.challenged}, you have been challenged to a game of Tic Tac Toe by ${match.challenger}.\n` +
                                     `Please type 'accept' or 'a' to accept the match, and 'decline' or 'd' to decline the match.\n` +
                                     `This challenge will expire in 30 seconds.`);
             message.channel.send(res);
@@ -112,7 +112,7 @@ module.exports = {
             let challengeResponse = message.channel.createMessageCollector(filter, { max: 1, time: 30000 });
 
             challengeResponse.on('collect', m => {
-                let response = ['accept', 'a'].some(c => c === m.content) ? 'accept' : 'decline';
+                let response = ['accept', 'a'].some(c => c === m.content.toLowerCase()) ? 'accept' : 'decline';
                 // ^ response is equal to 'accept' if the m.content is 'a' or 'accept', otherwise it's equal to 'decline'.
                 challengeResponse.stop(response); // Stops the collection with the response variable as the reason.
             });
@@ -120,12 +120,12 @@ module.exports = {
             challengeResponse.on('end', (col, reason) => {
                 switch (reason) { // A reason switch. This is used to determine outcomes of collectors.
                     case 'accept':
-                        res.setDescription(`${match.challenged.username} has accepted the challenge. The match will begin shortly.`);
+                        res.setDescription(`${match.challenged} has accepted the challenge. The match will begin shortly.`);
                         message.channel.send(res);
                         startMatch();
                         break;
                     case 'decline':
-                        res.setDescription(`${match.challenged.username} has declined the challenge.`);
+                        res.setDescription(`${match.challenged} has declined the challenge.`);
                         message.channel.send(res);
                         break;
                     case 'time': // The 'time' reason is emmited when the message collecter expires.
@@ -161,7 +161,7 @@ module.exports = {
                 // if (m.content.toLowerCase() === "quit") {
                 //     collector.stop('quit')
                 // } else 
-                if (["quit", "exit", "leave"].some(c => c === m.content)) {
+                if (["quit", "exit", "leave"].some(c => c === m.content.toLowerCase())) {
                     // if either player (regardless of whose turn it is) types quit, exit, or leave, stop the match.
                     collector.stop('quit');
                 } else if (m.author !== currentPlayer) { // If it's not the players turn, exit.
@@ -201,7 +201,7 @@ module.exports = {
                         break;
                     case 'win':
                         board.print();
-                        res.setDescription(`${match.winner.username} has won the game.`);
+                        res.setDescription(`${match.winner} has won the game.`);
                         message.channel.send(res);
                         match.status = 'finished';
                         break;
