@@ -33,6 +33,8 @@ module.exports = {
                 commands.find(cmd => cmd.aliases && cmd.aliases.includes(args[0]))) { 
                 return true;
             } else {
+                let response = new Discord.MessageEmbed().setDescription('That is not a valid command. Please specifiy a valid command.');
+                message.channel.send(response);
                 return false;
             }
         }
@@ -160,9 +162,7 @@ module.exports = {
                     message.channel.send(constructEmbedList(completeList, lists));
                     break;
             }; // Sends the desired list
-        }
-
-        if (isRequestingSpecification(args, commands)) {
+        } else if (isRequestingSpecification(args, commands)) {
             message.delete();
             message.channel.send(constructEmbedSpecification(args, commands));
         }
