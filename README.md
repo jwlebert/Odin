@@ -1,3 +1,6 @@
+# NOTE
+This bot no longer seems to work in the current version of discord.js. It has been archived and is no longer under development.
+
 # Odin
 This directory will contain the code for a general purpose Discord bot called Odin, made with discord.js.
 
